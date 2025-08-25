@@ -6,9 +6,10 @@ import instance from "../axios/axios";
 
 export default function AuthPage() {
   const [activeTab, setActiveTab] = useState("login");
-  const [loginData, setLoginData] = useState({ phone: "", password: "" }); // ✅ FIXED
+  const [loginData, setLoginData] = useState({ phone: "", password: "" });
   const [registerData, setRegisterData] = useState({ phone: "", name: "", password: "" });
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -17,28 +18,29 @@ export default function AuthPage() {
   const handleLogin = async (e: any) => {
     e.preventDefault();
 
-    // Frontend validation
     if (!/^\d{10}$/.test(loginData.phone)) {
-      alert("Please enter a valid 10-digit phone number.");
+      setMessage({ type: "error", text: "Please enter a valid 10-digit phone number." });
       return;
     }
 
     try {
       setLoading(true);
-      const res = await instance.post("/user/login", loginData); // phone + password
+      setMessage(null);
+
+      const res = await instance.post("/user/login", loginData);
 
       if (res.data.success) {
         if (res.data.token) {
           localStorage.setItem("token", res.data.token);
         }
         dispatch(setUserExists(true));
+        setMessage({ type: "success", text: "Login successful!" });
         navigate("/");
       } else {
-        alert(res.data.message || "Login failed");
+        setMessage({ type: "error", text: res.data.message || "Login failed" });
       }
     } catch (err: any) {
-      console.error(err);
-      alert(err.response?.data?.message || "Login error");
+      setMessage({ type: "error", text: err.response?.data?.message || "Login error" });
     } finally {
       setLoading(false);
     }
@@ -48,14 +50,15 @@ export default function AuthPage() {
   const handleRegister = async (e: any) => {
     e.preventDefault();
 
-    // Frontend validation
     if (!/^\d{10}$/.test(registerData.phone)) {
-      alert("Please enter a valid 10-digit phone number.");
+      setMessage({ type: "error", text: "Please enter a valid 10-digit phone number." });
       return;
     }
 
     try {
       setLoading(true);
+      setMessage(null);
+
       const res = await instance.post("/user/register", registerData);
 
       if (res.data.success) {
@@ -63,13 +66,13 @@ export default function AuthPage() {
           localStorage.setItem("token", res.data.token);
         }
         dispatch(setUserExists(true));
+        setMessage({ type: "success", text: "Registration successful!" });
         navigate("/");
       } else {
-        alert(res.data.message || "Register failed");
+        setMessage({ type: "error", text: res.data.message || "Register failed" });
       }
     } catch (err: any) {
-      console.error(err);
-      alert(err.response?.data?.message || "Register error");
+      setMessage({ type: "error", text: err.response?.data?.message || "Register error" });
     } finally {
       setLoading(false);
     }
@@ -83,17 +86,13 @@ export default function AuthPage() {
         <div className="flex">
           <button
             onClick={() => setActiveTab("login")}
-            className={`flex-1 py-3 font-semibold ${
-              activeTab === "login" ? "bg-white" : "bg-gray-100"
-            }`}
+            className={`flex-1 py-3 font-semibold ${activeTab === "login" ? "bg-white" : "bg-gray-100"}`}
           >
             Login
           </button>
           <button
             onClick={() => setActiveTab("register")}
-            className={`flex-1 py-3 font-semibold ${
-              activeTab === "register" ? "bg-white" : "bg-gray-100"
-            }`}
+            className={`flex-1 py-3 font-semibold ${activeTab === "register" ? "bg-white" : "bg-gray-100"}`}
           >
             Register
           </button>
@@ -168,6 +167,17 @@ export default function AuthPage() {
               {loading ? "Registering..." : "Register"}
             </button>
           </form>
+        )}
+
+        {/* ✅ Inline Messages */}
+        {message && (
+          <p
+            className={`text-center text-sm font-medium py-2 ${
+              message.type === "success" ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {message.text}
+          </p>
         )}
       </div>
     </div>
