@@ -6,7 +6,7 @@ import instance from "../axios/axios";
 
 export default function AuthPage() {
   const [activeTab, setActiveTab] = useState("login");
-  const [loginData, setLoginData] = useState({ name: "", password: "" });
+  const [loginData, setLoginData] = useState({ phone: "", password: "" }); // ✅ FIXED
   const [registerData, setRegisterData] = useState({ phone: "", name: "", password: "" });
   const [loading, setLoading] = useState(false);
 
@@ -16,16 +16,21 @@ export default function AuthPage() {
   // ✅ Login API
   const handleLogin = async (e: any) => {
     e.preventDefault();
+
+    // Frontend validation
+    if (!/^\d{10}$/.test(loginData.phone)) {
+      alert("Please enter a valid 10-digit phone number.");
+      return;
+    }
+
     try {
       setLoading(true);
-      const res = await instance.post("/user/login", loginData);
+      const res = await instance.post("/user/login", loginData); // phone + password
 
       if (res.data.success) {
-        // Save token if backend sends one
         if (res.data.token) {
           localStorage.setItem("token", res.data.token);
         }
-
         dispatch(setUserExists(true));
         navigate("/");
       } else {
@@ -42,16 +47,21 @@ export default function AuthPage() {
   // ✅ Register API
   const handleRegister = async (e: any) => {
     e.preventDefault();
+
+    // Frontend validation
+    if (!/^\d{10}$/.test(registerData.phone)) {
+      alert("Please enter a valid 10-digit phone number.");
+      return;
+    }
+
     try {
       setLoading(true);
       const res = await instance.post("/user/register", registerData);
 
       if (res.data.success) {
-        // After registration, log in automatically
         if (res.data.token) {
           localStorage.setItem("token", res.data.token);
         }
-
         dispatch(setUserExists(true));
         navigate("/");
       } else {
@@ -93,11 +103,11 @@ export default function AuthPage() {
         {activeTab === "login" && (
           <form onSubmit={handleLogin} className="p-5 grid gap-4">
             <div>
-              <label className="block mb-1 text-sm font-medium">Name</label>
+              <label className="block mb-1 text-sm font-medium">Phone Number</label>
               <input
                 type="text"
-                value={loginData.name}
-                onChange={(e) => setLoginData({ ...loginData, name: e.target.value })}
+                value={loginData.phone}
+                onChange={(e) => setLoginData({ ...loginData, phone: e.target.value })}
                 className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
             </div>
