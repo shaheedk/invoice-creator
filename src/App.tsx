@@ -1,5 +1,5 @@
 import {  Route, Routes } from "react-router-dom"
-import WorkOrderForm from "./components/WorkOrderForm"
+import WorkOrderForm from "./pages/WorkOrderForm"
 import AuthPage from "./pages/Login"
 import CreateCustomerForm from "./components/CustomerForm"
 

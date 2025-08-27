@@ -1,6 +1,6 @@
 import { useState } from "react";
 import instance from "../axios/axios";
-import InvoiceList from "./InvoiceTable";
+import InvoiceList from "../components/InvoiceTable";
 
 export default function CreateInvoice() {
   const [customerName, setCustomerName] = useState("");
